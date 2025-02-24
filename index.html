@@ -1,0 +1,785 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Parking Slot System</title>
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+      :root {
+        /* Default Colors */
+        --background-color: #ffeb3b;
+        --text-color: #212121;
+        --input-bg: #ffffff;
+        --button-bg: linear-gradient(45deg, #ff6b6b, #f06595);
+        --button-hover-bg: linear-gradient(45deg, #f06595, #ff6b6b);
+        --section-bg: #ffcc00;
+        --section-shadow: rgba(0, 0, 0, 0.15);
+        --slot-bg: linear-gradient(135deg, #ff9ff3, #feca57);
+        --slot-occupied-bg: linear-gradient(135deg, #ff6b6b, #ee5253);
+        --input-border: #f8a5c2;
+        --text-muted: #7f8fa6;
+      }
+
+      /* Dark Mode Colors */
+      .dark-mode {
+        --background-color: #2c3e50;
+        --text-color: #ecf0f1;
+        --input-bg: #34495e;
+        --button-bg: #1abc9c;
+        --button-hover-bg: #16a085;
+        --section-bg: #34495e;
+        --section-shadow: rgba(255, 255, 255, 0.2);
+        --slot-bg: #1abc9c;
+        --slot-occupied-bg: #e74c3c;
+      }
+
+      /* Retro Mode Colors */
+      .retro-mode {
+        --background-color: #ffcc00;
+        --text-color: #000;
+        --input-bg: #fff;
+        --button-bg: #ff5733;
+        --button-hover-bg: #ffbd33;
+        --section-bg: #ffcc00;
+        --section-shadow: rgba(0, 0, 0, 0.3);
+        --slot-bg: #4caf50;
+        --slot-occupied-bg: #f44336;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Poppins", sans-serif;
+        background-color: var(--background-color);
+        color: var(--text-color);
+        scroll-behavior: smooth;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-height: 100vh;
+        justify-content: flex-start;
+      }
+
+      .container {
+        padding: 20px;
+        width: 90%;
+        max-width: 850px;
+        background-color: var(--section-bg);
+        box-shadow: 0 10px 25px var(--section-shadow);
+        border-radius: 15px;
+        animation: fadeIn 1s ease-out;
+        transition: all 0.3s ease;
+        margin: 20px 0;
+        text-align: center;
+      }
+
+      h1 {
+        color: var(--text-color);
+        font-size: 2.5rem;
+        margin-bottom: 20px;
+        text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.3);
+      }
+
+      h2 {
+        color: var(--text-color);
+        font-weight: 700;
+        margin: 20px 0;
+        border-bottom: 2px solid var(--text-color);
+        padding-bottom: 10px;
+        font-size: 1.5rem;
+      }
+
+      .theme-toggle {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .theme-toggle label {
+        font-size: 1rem;
+        color: var(--text-color);
+      }
+
+      #theme-select {
+        padding: 10px;
+        border-radius: 8px;
+        border: 2px solid var(--input-border);
+        background-color: var(--input-bg);
+        color: var(--text-color);
+        font-size: 16px;
+        transition: border 0.3s ease;
+        cursor: pointer;
+      }
+
+      #theme-select:hover {
+        border-color: var(--button-bg);
+      }
+
+      input,
+      select,
+      button {
+        background-color: var(--input-bg);
+        color: var(--text-color);
+        padding: 15px;
+        margin-bottom: 15px;
+        border-radius: 8px;
+        border: 2px solid var(--input-border);
+        box-sizing: border-box;
+        font-size: 16px;
+        transition: all 0.3s ease;
+        width: calc(100% - 30px);
+      }
+
+      button {
+        background: var(--button-bg);
+        color: #ffffff;
+        border: none;
+        cursor: pointer;
+        transition:
+          background 0.3s ease,
+          transform 0.3s ease,
+          box-shadow 0.3s ease;
+      }
+
+      button:hover {
+        background: var(--button-hover-bg);
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+      }
+
+      .button-group {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        margin: 20px 0; 
+      }
+
+      /* Slot Styles */
+      .slot-container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 15px;
+        margin-top: 20px;
+      }
+
+      .slot {
+        padding: 20px;
+        background: var(--slot-bg);
+        color: white;
+        text-align: center;
+        font-weight: 600;
+        border-radius: 12px;
+        cursor: pointer;
+        transition:
+          transform 0.3s ease,
+          box-shadow 0.3s ease;
+        width: 120px; 
+        height: 100px; 
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      }
+
+      .slot.occupied {
+        background: var(--slot-occupied-bg);
+      }
+
+      .receipt-box {
+        margin-top: 20px;
+        padding: 20px;
+        background-color: var(--input-bg);
+        border: 2px solid var(--input-border);
+        border-radius: 12px;
+        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+        font-size: 16px;
+        color: var(--text-color);
+        transition: transform 0.3s ease;
+        width: calc(100% - 30px);
+      }
+
+      .receipt-box:hover {
+        transform: scale(1.02);
+      }
+
+      #vehicle-history {
+        margin-top: 20px;
+        padding: 20px;
+        background-color: var(--input-bg);
+        border: 2px solid var(--input-border);
+        border-radius: 12px;
+        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+        font-size: 16px;
+        color: var(--text-color);
+        width: calc(100% - 30px);
+        max-height: 300px;
+        overflow-y: auto;
+      }
+
+      .history-item {
+        padding: 10px;
+        border-bottom: 1px solid var(--input-border);
+        text-align: left;
+      }
+
+      .history-item:last-child {
+        border-bottom: none;
+      }
+
+      .sr-only {
+        position: absolute;
+        width: 0;
+        height: 0;
+        padding: 0;
+        border: 0;
+        clip: rect(0, 0, 0, 0);
+        overflow: hidden;
+      }
+
+      .form-group {
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 20px;
+      }
+
+      .form-group label {
+        margin-bottom: 5px;
+        font-weight: bold;
+      }
+      
+
+
+        #welcome-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: grey;
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            z-index: 9999;
+        }
+
+        #welcome-screen button {
+            padding: 0.8em 1.8em;
+            border: 2px solid #17C3B2;
+            position: relative;
+            overflow: hidden;
+            background-color: transparent;
+            text-align: center;
+            text-transform: uppercase;
+            font-size: 1.5em;
+            transition: .3s;
+            z-index: 1;
+            font-family: inherit;
+            color: #17C3B2;
+            cursor: pointer;
+        }
+
+        #welcome-screen button::before {
+            content: '';
+            width: 0;
+            height: 300%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(45deg);
+            background: #17C3B2;
+            transition: .5s ease;
+            display: block;
+            z-index: -1;
+        }
+
+        #welcome-screen button:hover::before {
+            width: 105%;
+        }
+
+        #welcome-screen button:hover {
+            color: #111;
+        
+        }
+      /* New styles for the logo */
+      .logo {
+        position: absolute;
+        top: 10px; /* Adjust as necessary */
+        left: 10px; /* Adjust as necessary */
+        width: 100px; /* Set a width for the logo */
+        border-radius: 10px; /* Rounded corners */
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Add a shadow for presentation */
+      }
+        
+    </style>
+  </head>
+  <body>
+  
+      <div id="welcome-screen">
+        <h1>Welcome to Parking Slot System</h1>
+        <button onclick="enterPage()">Enter</button>
+    </div>
+    
+    
+    <div class="container">
+      <img src="" alt="" class="logo"/>
+
+
+      <!-- Theme Toggle Button -->
+      <div class="theme-toggle">
+        <label for="theme-select"></label>
+        <select id="theme-select" onchange="changeTheme()">
+          <option value="">Default</option>
+          <option value="dark">Dark Mode</option>
+          <option value="retro">Retro Mode</option>
+        </select>
+      </div>
+      <h1>Parking Slot System</h1>
+
+      <!-- User Management: Login and Signup -->
+      <section id="user-management" class="section">
+        <h2>User Management</h2>
+        <div class="button-group">
+          <button onclick="showSignUp()">Sign Up</button>
+          <button onclick="showLogin()">Login</button>
+        </div>
+      </section>
+
+      <!-- Sign Up Section -->
+      <section id="signup-section" class="section" style="display: none">
+        <h2>Sign Up</h2>
+        <input
+          type="text"
+          id="new-username"
+          placeholder="Enter a new username"
+          required
+          aria-label="New Username"
+        />
+        <input
+          type="password"
+          id="new-password"
+          placeholder="Enter a new password"
+          required
+          aria-label="New Password"
+        />
+        <select id="role-select" required aria-label="Role">
+          <option value="client">Client</option>
+          <option value="admin">Admin</option>
+        </select>
+        <button onclick="signUp()">Sign Up</button>
+        <button onclick="backToUserManagement()">Back</button>
+      </section>
+
+      <!-- Login Section -->
+      <section id="login-section" class="section" style="display: none">
+        <h2>Login</h2>
+        <input
+          type="text"
+          id="username"
+          placeholder="Enter your username"
+          required
+          aria-label="Username"
+        />
+        <input
+          type="password"
+          id="password"
+          placeholder="Enter your password"
+          required
+          aria-label="Password"
+        />
+        <button onclick="userLogin()">Login</button>
+        <button onclick="backToUserManagement()">Back</button>
+      </section>
+
+      <!-- Main Menu -->
+      <section id="main-menu" class="section" style="display: none">
+        <h2>Main Menu</h2>
+        <div class="button-group">
+          <button onclick="showVehicleManagement()">Vehicle Management</button>
+          <button onclick="showParkingSlots()">Show Parking Slots</button>
+          <button onclick="showReceiptForm()">Generate Receipt</button>
+          <button onclick="showVehicleHistory()">Vehicle History</button>
+          <button onclick="logout()">Logout</button>
+        </div>
+      </section>
+
+      <!-- Vehicle Management Section -->
+      <section id="vehicle-management" class="section" style="display: none">
+        <h2>Vehicle Management</h2>
+        <div class="form-group">
+          <label for="vehicleType">Vehicle Type:</label>
+          <select id="vehicleType" required aria-label="Vehicle Type">
+            <option value="Car">Car</option>
+            <option value="Motorcycle">Motorcycle</option>
+            <option value="Truck">Truck</option>
+            <option value="Bus">Bus</option>
+            <option value="Electric Vehicle">Electric Vehicle</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="wheels">Number of Wheels:</label>
+          <input
+            type="number"
+            id="wheels"
+            placeholder="Enter number of wheels"
+            required
+            aria-label="Number of Wheels"
+          />
+        </div>
+        <div class="form-group">
+          <label for="plateNumber">Plate Number:</label>
+          <input
+            type="text"
+            id="plateNumber"
+            placeholder="Enter plate number"
+            required
+            aria-label="Plate Number"
+          />
+        </div>
+        <div class="form-group">
+          <label for="color">Color:</label>
+          <input
+            type="text"
+            id="color"
+            placeholder="Enter vehicle color"
+            required
+            aria-label="Vehicle Color"
+          />
+        </div>
+        <div class="form-group">
+          <label for="slotNumber">Slot Number (1-25):</label>
+          <input
+            type="number"
+            id="slotNumber"
+            min="1"
+            max="25"
+            required
+            aria-label="Slot Number"
+          />
+        </div>
+        <button onclick="parkVehicle()">Park Vehicle</button>
+        <button onclick="backToMenu()">Back to Main Menu</button>
+      </section>
+
+      <!-- PARKING FEE/RECEIPT: Generates receipt for parked vehicles -->
+      <div id="receipt-section" class="section" style="display: none">
+        <h2>Generate Receipt</h2>
+        <label for="receiptSlotNumber">Slot Number (1-25):</label>
+        <input
+          type="number"
+          id="receiptSlotNumber"
+          required
+          aria-label="Slot Number"
+        />
+        <button onclick="generateReceipt()">Generate</button>
+        <div id="receipt" class="receipt-box"></div>
+        <button onclick="backToMenu()">Back to Main Menu</button>
+      </div>
+
+      <!-- Parking Slot Status Section -->
+      <section id="parking-slot-status" class="section" style="display: none">
+        <h2>Parking Slot Status</h2>
+        <div id="slots" class="slot-container" aria-live="polite"></div>
+        <button onclick="backToMenu()">Back to Main Menu</button>
+      </section>
+
+      <!-- Vehicle History Section -->
+      <section id="vehicle-history" class="section" style="display: none">
+        <h2>Vehicle History</h2>
+        <div id="history" class="receipt-box"></div>
+        <button onclick="backToMenu()">Back to Main Menu</button>
+      </section>
+    </div>
+
+    <script>
+    const TOTAL_SLOTS = 25;
+    let users = {
+      admin: { password: "bsit", role: "admin" },
+    };
+    let loginHistory = [];
+    let vehicleDetails = new Array(TOTAL_SLOTS).fill(null);
+    let parkingTimes = new Array(TOTAL_SLOTS).fill(null);
+    let loggedInUser = "";
+    let loggedInRole = "";
+    let vehicleHistory = []; 
+    
+    function enterPage() {
+      document.getElementById('welcome-screen').style.display = 'none';
+      document.querySelector('.container').style.display = 'block';
+    }
+
+    document.addEventListener('keydown', function(event) {
+      if (event.key === 'Enter') {
+        enterPage();
+      }
+    });
+
+    document.getElementById('welcome-screen').addEventListener('keydown', function(event) {
+      if (event.key === 'Enter') {
+        enterPage();
+      }
+    });
+
+
+      function changeTheme() {
+        const theme = document.getElementById("theme-select").value
+        document.body.classList.remove("dark-mode", "retro-mode")
+        if (theme === "dark") {
+          document.body.classList.add("dark-mode")
+        } else if (theme === "retro") {
+          document.body.classList.add("retro-mode")
+        }
+      }
+
+      function toggleSections(sectionId) {
+        const sections = document.querySelectorAll(".section")
+        sections.forEach((section) => {
+          section.style.display = section.id === sectionId ? "block" : "none"
+        })
+      }
+
+      // Show Sign Up form
+      function showSignUp() {
+        toggleSections("signup-section")
+      }
+
+      // Show Login form
+      function showLogin() {
+        toggleSections("login-section")
+      }
+
+      // Go back to user management
+      function backToUserManagement() {
+        toggleSections("user-management")
+      }
+
+      // User sign-up function
+      function signUp() {
+        const username = document.getElementById("new-username").value.trim()
+        const password = document.getElementById("new-password").value.trim()
+        const role = document.getElementById("role-select").value
+
+        if (username && password && !users[username]) {
+          users[username] = { password, role }
+          alert(`${username} signed up as ${role}`)
+          backToUserManagement()
+        } else {
+          alert("Username is either taken, invalid, or password is empty.")
+        }
+      }
+
+      // User login function
+      function userLogin() {
+        const username = document.getElementById("username").value.trim()
+        const password = document.getElementById("password").value.trim()
+
+        if (
+          username &&
+          password &&
+          users[username] &&
+          users[username].password === password
+        ) {
+          loggedInUser = username
+          loggedInRole = users[username].role
+          loginHistory.push({
+            username: loggedInUser,
+            time: new Date().toLocaleString(),
+          })
+
+          toggleSections("main-menu")
+        } else {
+          alert("Invalid username or password.")
+        }
+      }
+
+      // Show vehicle management section
+      function showVehicleManagement() {
+        if (loggedInRole === "client") {
+          toggleSections("vehicle-management")
+        } else {
+          alert("Only clients can manage vehicles.")
+        }
+      }
+
+      // Park vehicle function
+      function parkVehicle() {
+          const vehicleType = document.getElementById("vehicleType").value;
+          const wheels = parseInt(document.getElementById("wheels").value);
+          const plateNumber = document.getElementById("plateNumber").value.trim();
+          const color = document.getElementById("color").value.trim();
+          const slotNumber = parseInt(document.getElementById("slotNumber").value) - 1;
+
+          // Check if plate number and color are provided
+          if (!plateNumber || !color) {
+              alert("Please enter both the plate number and color before parking.");
+              return;
+          }
+
+          if (isValidVehicleData(wheels, slotNumber)) {
+              if (!vehicleDetails[slotNumber]) {
+                  vehicleDetails[slotNumber] = {
+                      vehicleType,
+                      wheels,
+                      plateNumber,
+                      color,
+                      user: loggedInUser,
+                  };
+                  parkingTimes[slotNumber] = new Date();
+                  vehicleHistory.push({
+                      vehicleType,
+                      plateNumber,
+                      slotNumber: slotNumber + 1,
+                      parkedAt: new Date(),
+                  }); 
+                  alert(`Vehicle parked in slot ${slotNumber + 1}.`);
+              } else {
+                  alert(`Slot ${slotNumber + 1} is already occupied.`);
+              }
+          } else {
+              alert("Invalid vehicle data. Please check the inputs.");
+          }
+      }
+
+
+      // Validate vehicle data
+      function isValidVehicleData(wheels, slotNumber) {
+        return (
+          wheels > 0 &&
+          wheels <= 18 &&
+          slotNumber >= 0 &&
+          slotNumber < TOTAL_SLOTS
+        )
+      }
+
+      // Show parking slots status
+      function showParkingSlots() {
+        if (loggedInRole === "admin") {
+          const slotsDiv = document.getElementById("slots")
+          slotsDiv.innerHTML = ""
+          vehicleDetails.forEach((vehicle, index) => {
+            const slotDiv = document.createElement("div")
+            slotDiv.className = "slot" + (vehicle ? " occupied" : "")
+            slotDiv.innerText = `Slot ${index + 1}: ${vehicle ? `Occupied (${vehicle.plateNumber})` : "Available"}`
+            slotsDiv.appendChild(slotDiv)
+          })
+          toggleSections("parking-slot-status")
+        } else {
+          alert("Only admins can view parking slot statuses.")
+        }
+      }
+
+      // Show receipt form
+      function showReceiptForm() {
+        toggleSections("receipt-section")
+      }
+
+// Generate receipt function
+function generateReceipt() {
+    const slotNumber = parseInt(document.getElementById("receiptSlotNumber").value) - 1;
+
+    if (vehicleDetails[slotNumber]) {
+        const parkedAt = parkingTimes[slotNumber];
+        const duration = Math.floor((new Date() - parkedAt) / 60000);
+        const fee = duration * 0.5; // Base fee calculation
+        const vatTax = fee * 0.12; // Calculate 12% VAT
+        const totalAmount = fee - vatTax; // Total after VAT deduction
+        const details = vehicleDetails[slotNumber];
+        const currentDate = new Date();
+
+        // Format date and time for receipt
+        const dateFormatted = currentDate.toLocaleDateString("en-US");
+        const timeFormatted = currentDate.toLocaleTimeString("en-US", {
+            hour: "numeric",
+            minute: "numeric",
+            hour12: true,
+        });
+        const parkedAtFormatted =
+            parkedAt.toLocaleDateString("en-US") +
+            " - " +
+            parkedAt.toLocaleTimeString("en-US", {
+                hour: "numeric",
+                minute: "numeric",
+                hour12: true,
+            });
+
+        document.getElementById("receipt").innerHTML = `
+            <h3>Receipt</h3>
+            <p>---------------------</p>
+            <p>Slot Number: ${slotNumber + 1}</p>
+            <p>Vehicle Type: ${details.vehicleType}</p>
+            <p>Wheels: ${details.wheels}</p>
+            <p>Plate Number: ${details.plateNumber}</p>
+            <p>Color: ${details.color}</p>
+            <p>Date: ${dateFormatted} - ${timeFormatted}</p>
+            <p>From: ${parkedAtFormatted}</p>
+            <p>To: ${dateFormatted} - ${timeFormatted}</p>
+            <p>Duration: ${duration} minutes</p>
+            <p>Fee (Before VAT): $${fee.toFixed(2)}</p>
+            <p>VAT (12%): -$${vatTax.toFixed(2)}</p>
+            <p>Total Amount: $${totalAmount.toFixed(2)}</p>
+            <p>Thank you for using our parking!</p>
+        `;
+
+        vehicleDetails[slotNumber] = null;
+        parkingTimes[slotNumber] = null;
+    } else {
+        alert("No vehicle in this slot.");
+    }
+}
+
+      // Show vehicle history
+      function showVehicleHistory() {
+        if (loggedInRole === "admin") {
+          const historyDiv = document.getElementById("history")
+          historyDiv.innerHTML = "" 
+
+          vehicleHistory.forEach((entry) => {
+            const historyItem = document.createElement("div")
+            historyItem.className = "history-item"
+            historyItem.innerHTML = `
+                        <strong>Plate Number:</strong> ${entry.plateNumber} <br/>
+                        <strong>Vehicle Type:</strong> ${entry.vehicleType} <br/>
+                        <strong>Slot Number:</strong> ${entry.slotNumber} <br/>
+                        <strong>Number of Wheels:</strong> ${entry.wheels} <br/>
+                        <strong>Parked At:</strong> ${entry.parkedAt.toLocaleString()} <br/>
+                    `
+            historyDiv.appendChild(historyItem)
+          })
+
+          toggleSections("vehicle-history") 
+        } else {
+          alert("Only admins can view vehicle history.") 
+        }
+      }
+
+
+      function logout() {
+        alert("You have logged out.")
+        resetSections()
+      }
+
+      function backToMenu() {
+        toggleSections("main-menu")
+      }
+
+      function resetSections() {
+        document.getElementById("username").value = ""
+        document.getElementById("receipt").innerHTML = ""
+        loggedInUser = ""
+        loggedInRole = ""
+        toggleSections("login-section")
+      }
+    </script>
+  </body>
+</html>
